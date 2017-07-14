@@ -95,58 +95,6 @@ int netlink() {
 	return 0;
 }
 
-int main2(int argc, char* argv[])
-{
-struct sockaddr_nl src_addr, dest_addr;
-    struct nlmsghdr *nlh = NULL; //Netlink数据包头
-    struct iovec iov;
-int ret;
-    struct msghdr msg;
-        int sock_fd = socket(AF_NETLINK, SOCK_RAW, 26);
-printf("sock fd: %d\n", sock_fd);
-        memset(&msg, 0, sizeof(msg));
-        memset(&src_addr, 0, sizeof(src_addr));
-        src_addr.nl_family = AF_NETLINK;
-        src_addr.nl_pid = getpid(); /* self pid */
-        src_addr.nl_groups = 0; /* not in mcast groups */
-        if(-1 == bind(sock_fd, (struct sockaddr*)&src_addr, sizeof(src_addr)))
-printf("bind error\n");
-        memset(&dest_addr, 0, sizeof(dest_addr));
-        dest_addr.nl_family = AF_NETLINK;
-        dest_addr.nl_pid = 0; /* For Linux Kernel */
-        dest_addr.nl_groups = 1; /* unicast */
-
-        nlh=(struct nlmsghdr *)malloc(NLMSG_SPACE(MAX_PAYLOAD));
-        /* Fill the netlink message header */
-        nlh->nlmsg_len = NLMSG_SPACE(MAX_PAYLOAD);
-        nlh->nlmsg_pid = getpid(); /* self pid */
-        nlh->nlmsg_flags = 0;
-        /* Fill in the netlink message payload */
-        strcpy((char*)NLMSG_DATA(nlh), "XX!");
-
-        iov.iov_base = (void *)nlh;
-        iov.iov_len = nlh->nlmsg_len;
-        msg.msg_name = (void *)&dest_addr;
-        msg.msg_namelen = sizeof(dest_addr);
-        msg.msg_iov = &iov;
-        msg.msg_iovlen = 1;
-
-        printf(" Sending message. ...\n");
-        if(-1 == sendmsg(sock_fd, &msg, 0))
-printf("get error sendmsg = %s\n",strerror(errno));
-
-        /* Read message from kernel */
-        memset(nlh, 0, NLMSG_SPACE(MAX_PAYLOAD));
-        printf(" Waiting message. ...\n");
-        recvmsg(sock_fd, &msg, 0);
-        printf(" Received message payload: %s\n",NLMSG_DATA(nlh));
-
-         /* Close Netlink Socket */
-        close(sock_fd);
-
-return 0;
-}
-
 int main() {
     int fd = 0;
     int cmd;
