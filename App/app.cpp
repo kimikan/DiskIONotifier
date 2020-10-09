@@ -21,7 +21,7 @@ const int GETDATA = 101;
 const int MAX_PAYLOAD = 128;
 
 int netlink() {
-	int state;
+    int state;
     struct sockaddr_nl src_addr, dest_addr;
     struct nlmsghdr *nlh = NULL; //Netlink数据包头
     struct iovec iov;
@@ -52,7 +52,7 @@ int netlink() {
         printf("malloc nlmsghdr error!\n");
         close(sock_fd);
         return -1;
-	}
+    }
     memset(&dest_addr,0,sizeof(dest_addr));
     dest_addr.nl_family = AF_NETLINK;
     dest_addr.nl_pid = 0; //B：设置目的端口号
@@ -72,8 +72,7 @@ int netlink() {
     //send message
     printf("state_smg\n");
     state_smg = sendmsg(sock_fd,&msg,0);
-    if(state_smg == -1)
-    {
+    if(state_smg == -1) {
         printf("get error sendmsg = %s\n",strerror(errno));
     }
     memset(nlh,0,NLMSG_SPACE(MAX_PAYLOAD));
@@ -83,16 +82,16 @@ int netlink() {
 		char* p = NULL;
         printf("In while recvmsg\n");
         state = recvmsg(sock_fd, &msg, 0);
-        if(state<0)
-        {
+        if(state<0) {
             printf("state<1");
         }
-		p = (char *) NLMSG_DATA(nlh);
+	
+        p = (char *) NLMSG_DATA(nlh);
         printf("Received message: ull: %Lu %d, %s\n", *(unsigned long long*) p, *(unsigned*)(p+8), p + 12);
     }
     close(sock_fd);
 
-	return 0;
+    return 0;
 }
 
 int main() {
@@ -108,20 +107,20 @@ int main() {
         return -1;
     }
     while(true) {
-		int n;
-		std::cout<<"Please input command(100, 110): "<<std::endl;
-		std::cin>>n;
+	int n;
+	std::cout<<"Please input command(100, 110): "<<std::endl;
+	std::cin>>n;
 
-		int ret;
-		if ((ret = ioctl(fd, n, &arg)) < 0) {
-			printf("Call cmd STart fail, ret: %d\n", ret);
-			return -1;
-		}
-
-		if(n == 100) {
-			netlink();
-		}
+	int ret;
+	if ((ret = ioctl(fd, n, &arg)) < 0) {
+		printf("Call cmd STart fail, ret: %d\n", ret);
+		return -1;
 	}
+
+	if(n == 100) {
+		netlink();
+	}
+    }
     
     close(fd);
     return 0;    
